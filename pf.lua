@@ -13,6 +13,9 @@ local CurrentCamera = workspace.CurrentCamera
 local mouse = Players.LocalPlayer:GetMouse()
 userInput = game:GetService("UserInputService")
 local gravity = workspace.gravity
+local lockSound = Instance.new("Sound", game.Workspace)
+lockSound.SoundId = "rbxassetid://9113880610"
+lockSound.Volume = 4
 
 local guns = {}
 local disallowed = {"JUGGUN", "PAINTBALL GUN", "PPK12", "SVK12E", "MG42"}
@@ -55,7 +58,9 @@ getgenv().settings = {visuals = {
     smooth = 3,
     showfov = false,
     fov = 30,
-    wallcheck = true
+    wallcheck = true,
+    lock = true,
+    locksound = false
 }}
 
 
@@ -158,6 +163,12 @@ rage:Toggle("Wall Check", "Choose to shoot through walls or not", settings.rage.
 end)
 rage:Slider("Smoothness", "How smooth your movement will be for locking on.", 1, 50, settings.rage.smooth, function(value)
     settings.rage.smooth = value
+end)
+rage:Toggle("Lock On Target", "Prevents the target from switching while aimbot is turned on.", settings.rage.lock, function(value)
+    settings.rage.lock = value
+end)
+rage:Toggle("Play Sound on Target Lost", "Plays a sound when the locking target is lost.", settings.rage.locksound, function(value)
+    settings.rage.locksound = value
 end)
 rage:Line()
 rage:Toggle("Show FOV", "See your FOV for your skill!", settings.rage.showfov, function(value)
@@ -467,7 +478,8 @@ while wait(1/30) do
     if Players.LocalPlayer.Character and Players.LocalPlayer.Character.Humanoid and settings.rage.aim and settings.rage.aiming then
         local speed = GetWeaponSpeed()
         if speed then
-            if not aimTarget or not aimTarget.Parent then
+            local target = aimTarget
+            if not settings.rage.lock or (not aimTarget or not aimTarget.Parent) then
                 local closest = nil
                 local distance = 100000000000
                 local screenCenter = CurrentCamera.ViewportSize / 2
@@ -487,6 +499,9 @@ while wait(1/30) do
                     end
                 end
                 aimTarget = closest
+            end
+            if (aimTarget == nil and settings.rage.locksound and target ~= nil and not aimTarget) then
+                lockSound:Play()
             end
             if(aimTarget and aimTarget:FindFirstChild("Head")) then
                 local vel = Vector3.new(0,0,0)
