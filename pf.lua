@@ -1,6 +1,7 @@
 -- Libraries
-local Math = loadstring(game:HttpGet("https://ducksite.xyz/ceri/irays_math.lua"))()
-local Prediction = loadstring(game:HttpGet("https://pastebin.com/raw/Ah7zPbzA"))()
+local Math = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/irays_math.lua"))()
+local Prediction = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/prediction.lua"))()
+local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/Waulk/MjrPF/main/FluxLib.lua)()
 
 -- Services
 local Players = game:GetService("Players")
@@ -93,7 +94,6 @@ lastTime = 0
 ######  WINDOW START
 ######
 ]]
-local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/fluxlib.txt")()
 
 local win = Flux:Window("Mjr PF 2.0", "Ur A Pred", Color3.fromRGB(255, 110, 48), Enum.KeyCode.RightShift)
 local visuals = win:Tab("Visuals ", "https://www.roblox.com/library/243755563/Eye")
@@ -122,6 +122,7 @@ visuals:Colorpicker("Visible Chams Color", Color3.fromRGB(4, 255, 0), function(v
     destroyChams()
     loadChams()
 end)
+visuals:Line()
 visuals:Toggle("Ballistics Tracker", "A built in ballistics tracker into every gun!", true, function(value)
     settings.visuals.ball = value
 end)
