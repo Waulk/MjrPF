@@ -36,7 +36,7 @@ function GetWeaponSpeed()
 end
 
 
-local settings = {visuals = {
+getgenv().settings = {visuals = {
     name = true,
     chams = true,
     chamc = Color3.fromRGB(255,25,25),
@@ -45,11 +45,13 @@ local settings = {visuals = {
     ball = true,
     cross = true,
     crossc = Color3.fromRGB(255,0,0),
-    dead = true
+    dead = true,
+    zoomfov = false,
+    zoomvalue = 15
 }, rage ={
     aim = true,
     aiming = false,
-    velocity = false,
+    velocity = true,
     smooth = 3,
     showfov = false,
     fov = 30,
@@ -98,61 +100,70 @@ lastTime = 0
 local win = Flux:Window("Mjr PF 2.0", "Ur A Pred", Color3.fromRGB(255, 110, 48), Enum.KeyCode.RightShift)
 local visuals = win:Tab("Visuals ", "https://www.roblox.com/library/243755563/Eye")
 local rage = win:Tab("Rage","https://www.roblox.com/library/20016321/Skull")
-visuals:Toggle("Names", "Show the names of your foes.", true, function(value)
+visuals:Toggle("Names", "Show the names of your foes.", settings.visuals.name, function(value)
     settings.visuals.name = value
 end)
-visuals:Toggle("Chams", "See enemy players through walls!", true, function(value)
+visuals:Toggle("Chams", "See enemy players through walls!", settings.visuals.chams, function(value)
     settings.visuals.chams = value
     destroyChams()
     loadChams()
 end)
-visuals:Colorpicker("Chams Color", Color3.fromRGB(255,25,25), function(value)
+visuals:Colorpicker("Chams Color", settings.visuals.chamc, function(value)
     settings.visuals.chamc = value
     destroyChams()
     loadChams()
 end)
 
-visuals:Toggle("Visible Chams", "Highlights the visible parts of the enemies!", true, function(value)
+visuals:Toggle("Visible Chams", "Highlights the visible parts of the enemies!", settings.visuals.vchams, function(value)
     settings.visuals.vchams = value
     destroyChams()
     loadChams()
 end)
-visuals:Colorpicker("Visible Chams Color", Color3.fromRGB(4, 255, 0), function(value)
+visuals:Colorpicker("Visible Chams Color", settings.visuals.vchamc, function(value)
     settings.visuals.vchamc = value
     destroyChams()
     loadChams()
 end)
 visuals:Line()
-visuals:Toggle("Ballistics Tracker", "A built in ballistics tracker into every gun!", true, function(value)
+visuals:Toggle("Ballistics Tracker", "A built in ballistics tracker into every gun!", settings.visuals.ball, function(value)
     settings.visuals.ball = value
 end)
-visuals:Toggle("Crosshair", "Shows you the centre of you screen.", true, function(value)
+visuals:Toggle("Crosshair", "Shows you the centre of you screen.", settings.visuals.cross, function(value)
     settings.visuals.cross = value
 end)
-visuals:Colorpicker("Crosshair Colour", Color3.fromRGB(255,0,0), function(value)
+visuals:Colorpicker("Crosshair Colour", settings.visuals.crossc, function(value)
     settings.visuals.crossc = value
     crosshair.Color = value
 end)
-visuals:Toggle("Remove Bodies", "Removes all the dead bodies when they appear.", true, function(value)
+visuals:Line()
+visuals:Toggle("Remove Bodies", "Removes all the dead bodies when they appear.", settings.visuals.dead, function(value)
     settings.visuals.dead = value
 end)
+visuals:Line()
+visuals:Toggle("Ultra Zoom", "Immediately sets your zoom upon holding right click", settings.visuals.zoomfov, function(value)
+    settings.visuals.zoomfov = value
+end)
+visuals:Slider("Zoom FOV", "The FOV to zoom to when aiming. (Does not play well with aimbot)", 5, 100, settings.visuals.zoomvalue, function(value)
+    settings.visuals.zoomvalue = value
+end)
 --RAGE
-rage:Toggle("Aimbot", "Show off your true skill with this trusty aim!", true, function(value)
+rage:Toggle("Aimbot", "Show off your true skill with this trusty aim!", settings.rage.aim, function(value)
     settings.rage.aim = value
 end)
-rage:Toggle("Predit Movement", "Predicts the movement of the person moving.", false, function(value)
+rage:Toggle("Predict Movement", "Predicts the movement of the person moving.", settings.rage.velocity, function(value)
     settings.rage.velocity = value
 end)
-rage:Toggle("Wall Check", "Choose to shoot through walls or not", true, function(value)
+rage:Toggle("Wall Check", "Choose to shoot through walls or not", settings.rage.wallcheck, function(value)
     settings.rage.wallcheck = value
 end)
-rage:Slider("Smoothness", "How smooth your movement will be for locking on.", 1, 50, 3, function(value)
+rage:Slider("Smoothness", "How smooth your movement will be for locking on.", 1, 50, settings.rage.smooth, function(value)
     settings.rage.smooth = value
 end)
-rage:Toggle("Show FOV", "See your FOV for your skill!", false, function(value)
+rage:Line()
+rage:Toggle("Show FOV", "See your FOV for your skill!", settings.rage.showfov, function(value)
     settings.rage.showfov = value
 end)
-rage:Slider("FOV", "Set your FOV for the aimbot.", 5, 400, 30, function(value)
+rage:Slider("FOV", "Set your FOV for the aimbot.", 5, 400, settings.rage.fov, function(value)
     settings.rage.fov = value
 end)
 --[[
@@ -160,7 +171,14 @@ end)
 ######  WINDOW END
 ######
 ]]
+local OldNewIndex = nil
 
+OldNewIndex = hookmetamethod(game, "__newindex", newcclosure(function(Self, Key, Value)
+    if (settings.rage.aiming and settings.visuals.zoomfov and not checkcaller() and Self == CurrentCamera and Key == "FieldOfView" ) then
+        return OldNewIndex(Self, Key, settings.visuals.zoomvalue)
+    end
+    return OldNewIndex(Self, Key, Value)
+end))
 
 animations = {}
 getgenv().client = {}; do
@@ -401,7 +419,9 @@ workspace.Ignore.DeadBody.ChildAdded:connect(function(ch)
     end
 end)
 mouse.Button2Down:connect(function() 
-    settings.rage.aiming = true
+    if (Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("Humanoid") and Players.LocalPlayer.Character.Humanoid.Health > 0) then
+        settings.rage.aiming = true
+    end
 end)
 mouse.Button2Up:connect(function() 
     settings.rage.aiming = false
