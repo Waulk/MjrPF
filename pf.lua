@@ -1,7 +1,7 @@
 -- Libraries
 local Math = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/irays_math.lua"))()
 local Prediction = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/prediction.lua"))()
-local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/Waulk/MjrPF/main/FluxLib.lua)()
+local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/Waulk/MjrPF/main/FluxLib.lua")()
 
 -- Services
 local Players = game:GetService("Players")
