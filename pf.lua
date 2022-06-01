@@ -2,6 +2,7 @@
 local Math = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/irays_math.lua"))()
 local Prediction = loadstring(game:HttpGet("https://raw.githubusercontent.com/Waulk/MjrPF/main/prediction.lua"))()
 local Flux = loadstring(game:HttpGet"https://raw.githubusercontent.com/Waulk/MjrPF/main/FluxLib.lua")()
+local HttpService = game:GetService("HttpService")
 
 -- Services
 local Players = game:GetService("Players")
@@ -13,6 +14,7 @@ local CurrentCamera = workspace.CurrentCamera
 local mouse = Players.LocalPlayer:GetMouse()
 userInput = game:GetService("UserInputService")
 local gravity = workspace.gravity
+local saveFile = "MJRPF.json"
 local lockSound = Instance.new("Sound", game.Workspace)
 lockSound.SoundId = "rbxassetid://9113880610"
 lockSound.Volume = 4
@@ -62,6 +64,45 @@ getgenv().settings = {visuals = {
     lock = true,
     locksound = false
 }}
+
+function saveSettings()
+    for z,v in pairs(settings) do
+        for i,x in pairs(v) do
+            if type(x) == "userdata" then
+                settings[z][i] = {x.R,x.G,x.B}
+            end
+        end
+    end
+    local json = HttpService:JSONEncode(settings)
+    writefile(saveFile, json)
+    for z,v in pairs(settings) do
+        for i,x in pairs(v) do
+            if type(x) == "table" then
+                settings[z][i] = Color3.fromRGB(x[1]*255,x[2]*255,x[3]*255)
+            end
+        end
+    end
+end
+function loadSettings()
+    if(isfile(saveFile)) then
+        local tempsettings = HttpService:JSONDecode(readfile(saveFile))
+        for z,x in pairs(settings) do
+            for i,v in pairs(x) do
+                if tempsettings[z][i] ~= nil then
+                    settings[z][i] = tempsettings[z][i]
+                end
+            end
+        end
+    end
+    for z,v in pairs(settings) do
+        for i,x in pairs(v) do
+            if type(x) == "table" then
+                settings[z][i] = Color3.fromRGB(x[1]*255,x[2]*255,x[3]*255)
+            end
+        end
+    end
+end
+loadSettings()
 
 
 drawingcache = {}
@@ -182,6 +223,10 @@ end)
 ######  WINDOW END
 ######
 ]]
+Players.PlayerRemoving:Connect(function(plr)
+    saveSettings()
+end)
+
 local OldNewIndex = nil
 
 OldNewIndex = hookmetamethod(game, "__newindex", newcclosure(function(Self, Key, Value)
