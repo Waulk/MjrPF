@@ -143,7 +143,7 @@ lastTime = 0
 ######
 ]]
 
-local win = Flux:Window("Mjr PF 2.0", "Ur A Pred", Color3.fromRGB(255, 110, 48), Enum.KeyCode.RightShift)
+local win = Flux:Window("Mjr PF 2.0", "Prediction Included", Color3.fromRGB(255, 110, 48), Enum.KeyCode.RightShift)
 local visuals = win:Tab("Visuals ", "https://www.roblox.com/library/243755563/Eye")
 local rage = win:Tab("Rage","https://www.roblox.com/library/20016321/Skull")
 visuals:Toggle("Names", "Show the names of your foes.", settings.visuals.name, function(value)
